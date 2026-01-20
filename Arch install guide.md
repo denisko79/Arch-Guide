@@ -117,7 +117,12 @@ arch-chroot /mnt
 ### Имя хоста
 
 ```bash
-echo "arch" > /etc/hostname
+echo "archlinux" > /etc/hostname
+
+cat > /etc/hosts << 'EOF'
+127.0.0.1 localhost
+::1 localhost
+127.0.0.1 archlinux.localdomain archlinux EOF
 ```
 
 ### Локали
@@ -127,6 +132,10 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+nano /etc/vconsole.conf
+KEYMAP=ru
+FONT=cyr-sun16
 ```
 
 ### Часовой пояс
@@ -214,6 +223,9 @@ pacman -S pipewire pipewire-pulse pipewire-alsa wireplumber
 
 ```bash
 systemctl --user enable pipewire pipewire-pulse
+
+pactl info | grep "Server Name"
+# Должно быть: PipeWire
 ```
 
 (Это можно сделать позже — сейчас достаточно установить.)
@@ -271,7 +283,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ### Установка
 
 ```bash
-pacman -S snapper
+pacman -S snapper grub-btrfs
 ```
 
 ### Настройка конфигурации по умолчанию
@@ -301,6 +313,22 @@ NUMBER_LIMIT_IMPORTANT="20"
 
 > Snapper будет делать снапшоты в `/.snapshots`.
 
+💡 При попытке выполнить команду может возникнуть ошибка:
+
+```
+The config 'root' does not exist. Likely snapper is not configured.
+```
+
+В этом случае выполните следующие действия:
+
+```bash
+sudo rm -rf /.snapshots
+sudo snapper -c root create-config /
+sudo nano /etc/snapper/configs/root      # Открываем для настройки
+sudo chmod a+rx /.snapshots              # Дадим права
+sudo snapper -c root list                # Проверка
+sudo snapper -c root create -d "test"    # Создадим снапшот для проверки
+```
 ### Настройка прав доступа
 
 ```bash
@@ -388,6 +416,48 @@ snapper list
 - Установите `btrbk` для резервного копирования Btrfs-снапшотов.
 - Настройте `fwupd` для обновления firmware.
 - Добавьте `tlp` или `powertop` для энергосбережения (особенно на ThinkPad).
+
+---
+
+---
+
+### 🔧 Установка `yay`
+
+1. **Убедитесь, что установлены необходимые зависимости**:
+   ```bash
+   sudo pacman -S --needed git base-devel
+   ```
+
+2. **Клонируйте репозиторий `yay`**:
+   ```bash
+   git clone https://aur.archlinux.org/yay.git
+   cd yay
+   ```
+
+3. **Соберите и установите пакет**:
+   ```bash
+   makepkg -si
+   ```
+
+4. **Проверьте установку**:
+   ```bash
+   yay --version
+   ```
+
+---
+
+### 💡 Советы
+
+- После установки `yay` можно использовать как `pacman`, но с поддержкой AUR. Например:
+  ```bash
+  yay -S имя_пакета_из_AUR
+  ```
+- Чтобы обновить систему **включая AUR-пакеты**, просто выполните:
+  ```bash
+  yay
+  ```
+
+- При первом запуске `yay` предложит настроить параметры — можно оставить значения по умолчанию или настроить под себя.
 
 ---
 
