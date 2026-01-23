@@ -46,8 +46,8 @@ fdisk /dev/sda
 ### Форматирование
 
 ```bash
-mkfs.fat -F32 /dev/sda1
-mkfs.btrfs -f /dev/sda2
+mkfs.fat -F32 -n BOOT /dev/sda1
+mkfs.btrfs -f -L arch /dev/sda2
 ```
 
 ### Монтирование и создание subvolumes
@@ -119,10 +119,10 @@ arch-chroot /mnt
 ```bash
 echo "archlinux" > /etc/hostname
 
-cat > /etc/hosts << 'EOF'
+nano /etc/hosts
 127.0.0.1 localhost
 ::1 localhost
-127.0.0.1 archlinux.localdomain archlinux EOF
+127.0.0.1 archlinux.localdomain archlinux
 ```
 
 ### Локали
@@ -464,5 +464,6 @@ snapper list
 Готово! У вас минимальная, но полностью функциональная Arch-система с Btrfs, ZRAM, PipeWire, Snapper и поддержкой всех указанных компонентов.
 
 Если вы используете **ThinkPad X230i** — драйверы уже включены в `linux-firmware`, всё должно работать «из коробки».
+
 
 Удачи! 🐧
