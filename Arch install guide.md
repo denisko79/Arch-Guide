@@ -91,7 +91,7 @@ mount /dev/sda1 /mnt/boot/efi
 ## 📦 2. Установка базовой системы
 
 ```bash
-pacstrap /mnt base base-devel linux linux-firmware btrfs-progs vim nano sudo grub efibootmgr intel-ucode
+pacstrap /mnt base base-devel linux linux-firmware btrfs-progs vim nano sudo grub efibootmgr intel-ucode openssh
 ```
 
 > Если у вас AMD — замените `intel-ucode` на `amd-ucode`.
@@ -467,3 +467,4 @@ snapper list
 
 
 Удачи! 🐧
+
