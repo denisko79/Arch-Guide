@@ -1,5 +1,4 @@
 <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" alt="Linux" width="24" />
-https://upload.wikimedia.org/wikipedia/commons/2/2f/Arch_Linux_logo.svg
 **Вот исчерпывающий гайд по установке Arch Linux с учётом ваших требований:**
 
 - Файловая система: **Btrfs** (включая `/boot`) + subvolumes  
@@ -485,6 +484,7 @@ nano -l имя_файла
 ```
 
 Удачи! 🐧
+
 
 
 
