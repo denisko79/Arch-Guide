@@ -21,8 +21,16 @@
 ls /sys/firmware/efi/efivars
 # Проверьте подключение к интернету
 ping -c3 ya.ru
+# Если Wi-Fi
+iwctl
+> device list
+> station wlan0 scan
+> station wlan0 get-networks
+> station wlan0 connect "ИМЯ_WIFI"
+> exit
 # Обновите системные часы
 timedatectl set-ntp true
+timedatectl status
 ```
 
 ---
