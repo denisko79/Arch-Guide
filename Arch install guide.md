@@ -41,6 +41,9 @@ timedatectl status
 
 ### Создание таблицы разделов (UEFI)
 
+# Проверка разделов\дисков
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
+
 ```bash
 fdisk /dev/sda
 ```
