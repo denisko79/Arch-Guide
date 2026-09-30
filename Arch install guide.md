@@ -45,10 +45,25 @@ timedatectl status
 lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
 fdisk /dev/sda
 ```
-
 - Создайте GPT-таблицу (`g`)
 - Раздел 1: **EFI System Partition (ESP)** — 1 ГБ, тип `1` (EFI)
 - Раздел 2: **Linux filesystem** — всё оставшееся место, тип `20` (Linux filesystem)
+
+g          (Создать новую таблицу GPT)
+n          (Новый раздел)
+1          (Номер раздела)
+<Enter>    (Первый сектор)
++1G        (Размер для EFI)
+t          (Сменить тип)
+1          (Номер раздела)
+uefi       (Тип EFI System)
+
+n          (Новый раздел)
+2          (Номер раздела)
+<Enter>    (Первый сектор)
+<Enter>    (Последний сектор, весь остаток)
+p          (Проверить таблицу)
+w          (Записать и выйти)
 
 Результат:
 - `/dev/sda1` → ESP (FAT32)
@@ -75,35 +90,41 @@ btrfs subvolume create /mnt/@var_cache
 btrfs subvolume list /mnt
 umount /mnt
 ```
+✅ Ожидаемый результат: Выводятся 5 созданных subvolume (@, @home, @var_log, @var_cache, @snapshots).
 
 ### Монтируем с нужными опциями
 
 ```bash
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@ /dev/sda2 /mnt
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@ /dev/sda2 /mnt
 
-mkdir -p /mnt/{boot,home,.snapshots,var/log}
+mkdir -p /mnt/{home,var/log,var/cache,.snapshots,boot/efi}
 
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@boot /dev/sda2 /mnt/boot
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@home /dev/sda2 /mnt/home
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@snapshots /dev/sda2 /mnt/.snapshots
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@var_log /dev/sda2 /mnt/var/log
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@home /dev/sda2 /mnt/home
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@snapshots /dev/sda2 /mnt/.snapshots
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@var_log /dev/sda2 /mnt/var/log
+mount -o noatime,compress=zstd:3,space_cache=v2,subvol=@var_cache /dev/sda2 /mnt/var/cache
 ```
-
-> ⚠️ Важно: `/boot` — это **subvolume**, а не отдельный раздел! Это допустимо при использовании UEFI + GRUB + Btrfs.
-
 ### Монтируем ESP
 
 ```bash
 mkdir -p /mnt/boot/efi
 mount /dev/sda1 /mnt/boot/efi
 ```
-
+# Проверка
+findmnt /mnt
 ---
 
 ## 📦 2. Установка базовой системы
 
 ```bash
-pacstrap /mnt base base-devel linux linux-firmware btrfs-progs vim nano sudo grub efibootmgr intel-ucode openssh
+
+# Обновляем зеркала
+reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+
+# Если reflector отсутствует в ISO
+pacman -Sy reflector
+
+pacstrap -K /mnt base linux linux-firmware btrfs-progs grub efibootmgr snapper networkmanager sudo nano vim git curl wget bash-completion man-db man-pages texinfo base-devel intel-ucode
 ```
 
 > Если у вас AMD — замените `intel-ucode` на `amd-ucode`.
@@ -116,7 +137,7 @@ pacstrap /mnt base base-devel linux linux-firmware btrfs-progs vim nano sudo gru
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
-Проверьте `/mnt/etc/fstab` — все subvolumes должны быть с правильными `subvol=`.
+Проверьте `cat /mnt/etc/fstab` — все subvolumes должны быть с правильными `subvol=`.
 
 ```bash
 arch-chroot /mnt
