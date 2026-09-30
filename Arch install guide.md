@@ -41,15 +41,13 @@ timedatectl status
 
 ### Создание таблицы разделов (UEFI)
 
-# Проверка разделов\дисков
-lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
-
 ```bash
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
 fdisk /dev/sda
 ```
 
 - Создайте GPT-таблицу (`g`)
-- Раздел 1: **EFI System Partition (ESP)** — 512 МБ, тип `1` (EFI)
+- Раздел 1: **EFI System Partition (ESP)** — 1 ГБ, тип `1` (EFI)
 - Раздел 2: **Linux filesystem** — всё оставшееся место, тип `20` (Linux filesystem)
 
 Результат:
@@ -59,8 +57,8 @@ fdisk /dev/sda
 ### Форматирование
 
 ```bash
-mkfs.fat -F32 -n BOOT /dev/sda1
-mkfs.btrfs -f -L arch /dev/sda2
+mkfs.fat -F32 -n EFI /dev/sda1
+mkfs.btrfs -f -L archroot /dev/sda2
 ```
 
 ### Монтирование и создание subvolumes
@@ -72,8 +70,9 @@ btrfs subvolume create /mnt/@
 btrfs subvolume create /mnt/@home
 btrfs subvolume create /mnt/@snapshots
 btrfs subvolume create /mnt/@var_log
-btrfs subvolume create /mnt/@boot          # <-- boot как subvolume!
+btrfs subvolume create /mnt/@var_cache
 
+btrfs subvolume list /mnt
 umount /mnt
 ```
 
