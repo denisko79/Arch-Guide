@@ -17,9 +17,10 @@
 Скачайте официальный ISO Arch Linux и загрузитесь с него.
 
 ```bash
+# Проверка UEFI
+ls /sys/firmware/efi/efivars
 # Проверьте подключение к интернету
-ping -c3 archlinux.org
-
+ping -c3 ya.ru
 # Обновите системные часы
 timedatectl set-ntp true
 ```
